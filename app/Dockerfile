@@ -13,7 +13,10 @@ FROM node:22-alpine
 
 WORKDIR /app
 
+RUN addgroup -S app && adduser -S app -G app
 RUN rm /bin/sh
+
+USER app
 
 COPY --from=builder /app /app
 
