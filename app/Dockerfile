@@ -1,13 +1,20 @@
+FROM node:22-alpine as builder
+
+WORKDIR /app
+
+RUN corepack enable
+
+COPY package.json yarn.lock .yarnrc.yml /app
+COPY src /app/src
+
+RUN yarn install
+
 FROM node:22-alpine
 
 WORKDIR /app
 
-COPY package.json /app
-COPY yarn.lock /app
-COPY src /app/src
-COPY .yarnrc.yml /app
+RUN rm /bin/sh
 
-RUN corepack enable
-RUN yarn install
+COPY --from=builder /app /app
 
-CMD ["node", "src/main.mjs"]
+ENTRYPOINT ["node", "src/main.mjs"]
