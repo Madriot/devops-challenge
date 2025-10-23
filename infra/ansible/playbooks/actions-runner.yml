@@ -1,0 +1,89 @@
+
+---
+- name: Install Github Actions self-hosted agent
+  hosts: all
+  become: no
+  vars:
+    runner_version: 2.329.0
+    runner_download_path: /tmp/actions-runner.tar.gz
+    runner_folder: actions-runner
+    runner_name: devops-challenge
+    runner_scope_id: Madriot-devops-challenge
+  vars_files:
+  - ../vault.yml
+  
+  tasks:
+  - name: Check current Runner version
+    command: "./{{ runner_folder }}/bin/Runner.Listener --version"
+    register: runner_version_output
+    failed_when: false
+    changed_when: false
+  
+  - name: Parse Runner version
+    set_fact: 
+      installed_runner_version: "{{ runner_version_output.stdout }}"
+    when: runner_version_output.stdout != ""
+  
+  - name: Determine if Runner needs installation
+    set_fact:
+      runner_needs_install: "{{ installed_runner_version is not defined or installed_runner_version != runner_version }}"
+
+  - name: Create Runner working folder
+    file:
+      path: "{{ runner_folder }}"
+      state: directory
+      mode: 0755
+
+  - name: Download Runner package 
+    get_url:
+      url: https://github.com/actions/runner/releases/download/v{{ runner_version }}/actions-runner-linux-x64-{{ runner_version }}.tar.gz
+      dest: "{{ runner_download_path }}"
+      mode: "0644"
+      force: yes
+    when: runner_needs_install
+
+  - name: Unzip Runner package
+    unarchive:
+      src: "{{ runner_download_path }}"
+      dest: "{{ runner_folder }}"
+      remote_src: yes
+      mode: "0755"
+      extra_opts: 
+      - "-o" # Overwrite
+    when: runner_needs_install
+
+  - name: Configure Runner
+    ansible.builtin.shell: >
+      ./config.sh 
+      --url {{ github_project_url }}
+      --token {{ github_actions_token }}
+      --name {{ runner_name }}
+      --replace
+      --unattended
+    args:
+      chdir: "{{ runner_folder }}"
+    # no_log: true
+    when: runner_needs_install
+
+  - name: Check if Runner systemd service exists
+    ansible.builtin.systemd:
+      name: "actions.runner.{{ runner_scope_id }}.{{ runner_name }}.service"
+    register: runner_service
+    failed_when: false
+    changed_when: false
+
+  - name: Create Runner systemd service
+    ansible.builtin.shell: >
+      ./svc.sh install
+    args:
+      chdir: "{{ runner_folder }}"
+    # no_log: true
+    become: yes
+    when: runner_service.status is not defined
+
+  - name: Enable and start Runner service
+    ansible.builtin.systemd:
+      name: "actions.runner.{{ runner_scope_id }}.{{ runner_name }}.service"
+      state: started
+      enabled: true
+    become: yes

@@ -1,0 +1,17 @@
+- name: Install Prerequisites
+  hosts: all
+  become: yes
+
+  tasks:
+  - name: Ensure required OS packages are installed
+    apt:
+      name: 
+      - unzip
+      - apt-transport-https
+      - ca-certificates
+      - curl 
+      - gnupg 
+      - lsb-release
+      state: present
+      update_cache: yes
+    when: ansible_os_family == "Debian"

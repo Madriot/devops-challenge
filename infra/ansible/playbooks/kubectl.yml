@@ -1,0 +1,42 @@
+
+---
+- name: Install Kubectl
+  hosts: all
+  become: yes
+  vars:
+    kubectl_version: "v1.34.0"
+    kubectl_bin_path: "/usr/local/bin/"
+    kubectl_download_path: /tmp/kubectl
+  
+  tasks:
+  - name: Check current Kubectl version
+    command: kubectl version -ojson
+    register: kubectl_version_output
+    failed_when: false
+    changed_when: false
+  
+  - name: Parse Kubectl version
+    set_fact: 
+      installed_kubectl_version: "{{ kubectl_version_output.stdout | from_json | json_query('clientVersion.gitVersion') }}"
+    when: kubectl_version_output.stdout != ""
+  
+  - name: Determine if Kubectl needs installation
+    set_fact:
+      kubectl_needs_install: "{{ installed_kubectl_version is not defined or installed_kubectl_version != kubectl_version }}"
+
+  - name: Download Kubectl 
+    get_url:
+      url: https://dl.k8s.io/release/{{ kubectl_version }}/bin/linux/amd64/kubectl
+      dest: "{{ kubectl_download_path }}"
+      mode: "0644"
+      force: yes
+    when: kubectl_needs_install
+
+  - name: Copy the Kubectl binary
+    copy:
+      src: "{{ kubectl_download_path }}"
+      dest: "{{ kubectl_bin_path }}"
+      remote_src: yes
+      mode: "0755"
+      force: yes
+    when: kubectl_needs_install

@@ -7,7 +7,7 @@ const fastify = Fastify({
 });
 
 fastify.get("/healthz", async function (_, reply) {
-  reply.send({ status: "Healthy" });
+  reply.send({ SYS_ENV: process.env.SYS_ENV });
 });
 
 fastify.listen({ port: 3000, host: "0.0.0.0" }, function (err) {
