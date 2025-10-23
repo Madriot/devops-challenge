@@ -1,0 +1,2 @@
+[hosts]
+192.168.1.100 ansible_user=example ansible_ssh_private_key_file=~/.ssh/example_id_rsa

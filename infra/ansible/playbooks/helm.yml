@@ -1,0 +1,53 @@
+
+---
+- name: Install Helm
+  hosts: all
+  become: yes
+  vars:
+    helm_version: "v3.19.0"
+    helm_bin_path: "/usr/local/bin/"
+    helm_download_path: /tmp/helm.tar.gz
+    helm_unarchive_path: /tmp/
+  
+  tasks:
+  - name: Check current Helm version
+    command: helm version --template="{{'{{.Version}}'}}"
+    register: helm_version_output
+    failed_when: false
+    changed_when: false
+  
+  - name: Parse Helm version
+    set_fact: 
+      installed_helm_version: "{{ helm_version_output.stdout }}"
+    when: helm_version_output.stdout != ""
+  
+  - name: Determine if Helm needs installation
+    set_fact:
+      helm_needs_install: "{{ installed_helm_version is not defined or installed_helm_version != helm_version }}"
+
+  - name: Download Helm 
+    get_url:
+      url: https://get.helm.sh/helm-{{ helm_version }}-linux-amd64.tar.gz
+      dest: "{{ helm_download_path }}"
+      mode: "0644"
+      force: yes
+    when: helm_needs_install
+
+  - name: Unzip Helm
+    unarchive:
+      src: "{{ helm_download_path }}"
+      dest: "{{ helm_unarchive_path }}"
+      remote_src: yes
+      mode: "0755"
+      extra_opts: 
+      - "-o" # Overwrite
+    when: helm_needs_install
+
+  - name: Copy the Helm binary
+    copy:
+      src: "{{ helm_unarchive_path }}/linux-amd64/helm"
+      dest: "{{ helm_bin_path }}"
+      remote_src: yes
+      mode: "0755"
+      force: yes
+    when: helm_needs_install

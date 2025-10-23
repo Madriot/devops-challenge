@@ -1,0 +1,8 @@
+---
+- import_playbook: playbooks/prerequisites.yml
+- import_playbook: playbooks/podman.yml
+- import_playbook: playbooks/helm.yml
+- import_playbook: playbooks/kubectl.yml
+- import_playbook: playbooks/terraform.yml
+- import_playbook: playbooks/az-cli.yml
+- import_playbook: playbooks/actions-runner.yml

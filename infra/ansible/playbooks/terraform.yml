@@ -1,0 +1,42 @@
+---
+- name: Install Terraform
+  hosts: all
+  become: yes
+  vars:
+    terraform_version: "1.13.1"
+    terraform_bin_path: "/usr/local/bin"
+    terraform_download_path: /tmp/terraform.zip
+  
+  tasks:
+  - name: Check current Terraform version
+    command: terraform version -json
+    register: terraform_version_output
+    failed_when: false
+    changed_when: false
+  
+  - name: Parse Terraform version
+    set_fact: 
+      installed_terraform_version: "{{ terraform_version_output.stdout | from_json | json_query('terraform_version') }}"
+    when: terraform_version_output.stdout != ""
+  
+  - name: Determine if Terraform needs installation
+    set_fact:
+      terraform_needs_install: "{{ installed_terraform_version is not defined or installed_terraform_version != terraform_version }}"
+
+  - name: Download Terraform 
+    get_url:
+      url: https://releases.hashicorp.com/terraform/{{ terraform_version }}/terraform_{{ terraform_version }}_linux_amd64.zip
+      dest: "{{ terraform_download_path }}"
+      mode: "0644"
+      force: yes
+    when: terraform_needs_install
+
+  - name: Unzip Terraform
+    unarchive:
+      src: "{{ terraform_download_path }}"
+      dest: "{{ terraform_bin_path }}"
+      remote_src: yes
+      mode: "0755"
+      extra_opts: 
+      - "-o" # Overwrite
+    when: terraform_needs_install
