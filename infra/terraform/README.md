@@ -1,6 +1,6 @@
 #### Description
 
-This folder contains the Terraform code used to deploy the following resources: AKS, PDZ, VNET, IAM identities and roles. Some of the resources must be pre-created before running this code.
+This folder contains the Terraform code used to deploy the following resources: `AKS`, `PDZ`, `VNET`, `IAM` identities and roles. Some of the resources must be pre-created before running this code.
 
 The `DEV` folder contains the tfvars file corresponding to the `DEV` environment. 
 
@@ -9,14 +9,14 @@ The `DEV` folder contains the tfvars file corresponding to the `DEV` environment
 - Terraform
 - Azure CLI
 - A service principal with necessary permissions
+- Registered providers: Microsoft.ManagedIdentity and Microsoft.ContainerIstances
 
 #### Provisioned resources
 
 - AKS
 - Private DNS Zone
-- VNet and subnets
+- VNet, subnets and NSG
 - IAM identities and roles
-- Registered providers Microsoft.ManagedIdentity and Microsoft.ContainerIstances
 
 #### How to run
 
