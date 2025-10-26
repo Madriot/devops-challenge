@@ -1,0 +1,13 @@
+name: Build
+
+on:
+  push:
+    branches: [ "main" ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: devops-challenge
+
+    steps:
+    - uses: actions/checkout@v4

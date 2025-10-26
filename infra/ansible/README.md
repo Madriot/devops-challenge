@@ -29,4 +29,15 @@ ansible-playbook -i hosts.ini main.yml
 
 For security reasons, the hosts.ini file is not included in this public repository. If you plan to use this code, please create your own hosts.ini file (see hosts.ini.example).
 
-The `vault.yml` stores all secrets required by the playbooks. **Do not commit this file unencrypted**, or your secrets may be exposed. Even if encrypted, storing this file in a public repository poses a high risk. Ensure you use a strong, secure password.
+The `vault.yml` stores all secrets required by the playbooks. **Do not commit this file unencrypted**, or your secrets may be exposed. 
+
+Even if encrypted, storing this file in a public repository poses a high risk. Ensure you use a strong, secure password.
+
+#### Encrypt/Decrypt vault file
+```
+# Encrypt
+ansible-vault encrypt vault.yml
+
+# Decrypt
+ansible-vault decrypt vault.yml
+```
