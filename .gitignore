@@ -2,3 +2,6 @@
 */.env.*
 */node_modules/*
 hosts.ini
+.terraform
+.terraform.lock.hcl
+test.tfvars
