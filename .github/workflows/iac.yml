@@ -7,7 +7,7 @@ on:
 
 jobs:
   build:
-    runs-on: devops-challenge
+    runs-on: self-hosted
 
     steps:
     - uses: actions/checkout@v4
