@@ -37,6 +37,7 @@ jobs:
     - name: Podman build and push
       shell: bash
       run: |
+        cd app/
         podman build . --file Dockerfile --build-arg SYS_ENV=helloworld --tag $REGISTRY/$IMAGE:${GITHUB_SHA::7} --tag $REGISTRY/$IMAGE:latest
 
         # echo "Push images"
