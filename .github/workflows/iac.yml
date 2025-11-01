@@ -8,11 +8,13 @@ on:
   workflow_dispatch:
     inputs:
       planOnly:
+        type: boolean
         required: true
-        default: 'true'
+        default: true
       destroy:
+        type: boolean
         required: true
-        default: 'false'
+        default: false
 
 env:
   ARM_TENANT_ID: ${{ secrets.ARM_TENANT_ID }}
