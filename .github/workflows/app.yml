@@ -8,6 +8,11 @@ on:
     branches: [ "main" ]
   workflow_dispatch:
 
+env:
+  REGISTRY: acr
+  IMAGE: demo/app
+  #  ${{ secrets.acr }}
+
 jobs:
   test:
     runs-on: self-hosted
@@ -28,6 +33,16 @@ jobs:
   
     steps:
     - uses: actions/checkout@v4
+
+    - name: Podman build and push
+      shell: bash
+      run: |
+        podman build . --file Dockerfile --build-arg SYS_ENV=helloworld --tag $REGISTRY/$IMAGE:${GITHUB_SHA::7} --tag $REGISTRY/$IMAGE:latest
+
+        # echo "Push images"
+        # podman login to ACR
+        # podman push $REGISTRY/$IMAGE:latest
+        # podman push $REGISTRY/$IMAGE:${GITHUB_SHA::7}
 
   dev:
     needs: [build]
