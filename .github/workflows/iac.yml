@@ -1,13 +1,69 @@
-name: IaC
+name: Deploy IaC
 
 on:
   push:
     branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
   workflow_dispatch:
+    inputs:
+      planOnly:
+        required: true
+        default: 'true'
+      destroy:
+        required: true
+        default: 'false'
+
+env:
+  AKS_DNS_PREFIX: ${{ secrets.AKS_DNS_PREFIX }}
+  ENTRAID_ADMIN_GROUP_ID: ${{ secrets.ENTRAID_ADMIN_GROUP_ID }}
+  NAME_PREFIX: ${{ secrets.NAME_PREFIX }}
+  PDZ_DOMAIN: ${{ secrets.PDZ_DOMAIN }}
+  RG_NAME: ${{ secrets.RG_NAME }}
+  SHARED_RG: ${{ secrets.SHARED_RG }}
+  SHARED_STORAGE_ACCOUNT: ${{ secrets.SHARED_STORAGE_ACCOUNT }}
+  TFSTATE_CONTAINER: ${{ secrets.TFSTATE_CONTAINER }}
 
 jobs:
-  build:
+  lint:
     runs-on: self-hosted
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Lint
+      shell: bash
+      run: |
+        cd infra/terraform
+        FMT=$(terraform fmt -recursive -check)
+        
+        if [ -n "$FMT" ]; then
+          echo "Error: Please reformat Terraform files before pushing your changes!"
+          exit 1
+        fi
+
+  dev:
+    needs: [lint]
+    runs-on: self-hosted
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - uses: cschleiden/replace-tokens@v1
+      with:
+        tokenPrefix: '{'
+        tokenSuffix: '}'
+        files: '["**/*.tf"]'
+      env:
+        CDN: https://somecdn.com/...
+
+  prd:
+    needs: [dev]
+    if: github.event_name == 'workflow_dispatch'
+    runs-on: self-hosted
+
+    environment:
+      name: prd
 
     steps:
     - uses: actions/checkout@v4
