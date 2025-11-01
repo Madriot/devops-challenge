@@ -1,15 +1,20 @@
+import { describe, it, expect, beforeAll } from "vitest";
 import fastify from "../src/main.mjs";
-import { test, expect } from "@jest/globals";
 
-test("Fastify instance exists", () => {
-  expect(fastify).toBeDefined();
-});
+describe("Fastify /healthz", () => {
+  beforeAll(async () => {
+    await fastify.ready();
+  });
 
-test("GET /healthz route returns 200", async () => {
-  process.env.SYS_ENV = "test";
+  it("GET /healthz returns SYS_ENV", async () => {
+    process.env.SYS_ENV = "TEST";
 
-  const response = await fastify.inject({ method: "GET", url: "/healthz" });
+    const res = await fastify.inject({ method: "GET", url: "/healthz" });
 
-  expect(response.statusCode).toBe(200);
-  expect(response.json()).toEqual({ SYS_ENV: "test" });
+    expect(res.statusCode).toBe(200);
+
+    const body = res.json();
+
+    expect(body).toEqual({ SYS_ENV: "TEST" });
+  });
 });
