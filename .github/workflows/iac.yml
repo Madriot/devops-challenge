@@ -72,6 +72,8 @@ jobs:
       run: |
         cd infra/terraform
         
+        cp DEV/terraform.tfvars ./
+        
         terraform plan -out plan
 
     - name: Terraform Apply
