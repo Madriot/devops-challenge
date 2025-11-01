@@ -95,6 +95,7 @@ jobs:
         terraform destroy -auto-approve
 
   prd:
+    needs: [lint]
     if: github.event_name == 'workflow_dispatch' && github.ref_name == 'main'
     runs-on: self-hosted
 
