@@ -14,16 +14,6 @@ on:
         required: true
         default: 'false'
 
-env:
-  AKS_DNS_PREFIX: ${{ secrets.AKS_DNS_PREFIX }}
-  ENTRAID_ADMIN_GROUP_ID: ${{ secrets.ENTRAID_ADMIN_GROUP_ID }}
-  NAME_PREFIX: ${{ secrets.NAME_PREFIX }}
-  PDZ_DOMAIN: ${{ secrets.PDZ_DOMAIN }}
-  RG_NAME: ${{ secrets.RG_NAME }}
-  SHARED_RG: ${{ secrets.SHARED_RG }}
-  SHARED_STORAGE_ACCOUNT: ${{ secrets.SHARED_STORAGE_ACCOUNT }}
-  TFSTATE_CONTAINER: ${{ secrets.TFSTATE_CONTAINER }}
-
 jobs:
   lint:
     runs-on: self-hosted
@@ -51,11 +41,48 @@ jobs:
 
     - uses: cschleiden/replace-tokens@v1
       with:
-        tokenPrefix: '{'
-        tokenSuffix: '}'
+        tokenPrefix: '!['
+        tokenSuffix: ']'
         files: '["**/*.tf"]'
       env:
-        CDN: https://somecdn.com/...
+        AKS_DNS_PREFIX: ${{ secrets.AKS_DNS_PREFIX }}
+        ENTRAID_ADMIN_GROUP_ID: ${{ secrets.ENTRAID_ADMIN_GROUP_ID }}
+        NAME_PREFIX: ${{ secrets.NAME_PREFIX }}
+        PDZ_DOMAIN: ${{ secrets.PDZ_DOMAIN }}
+        RG_NAME: ${{ secrets.RG_NAME }}
+        SHARED_RG: ${{ secrets.SHARED_RG }}
+        SHARED_STORAGE_ACCOUNT: ${{ secrets.SHARED_STORAGE_ACCOUNT }}
+        TFSTATE_CONTAINER: ${{ secrets.TFSTATE_CONTAINER }}
+
+    - name: Terraform Init
+      shell: bash
+      run: |
+        cd infra/terraform
+        
+        terraform init
+
+    - name: Terraform Plan
+      shell: bash
+      run: |
+        cd infra/terraform
+        
+        terraform plan -out plan
+
+    - name: Terraform Apply
+      if: github.event.inputs.planOnly != 'true' && github.event.inputs.destroy != 'true'
+      shell: bash
+      run: |
+        cd infra/terraform
+        
+        terraform plan -out plan.out
+
+    - name: Terraform Destroy
+      if: github.event.inputs.planOnly != 'true' && github.event.inputs.destroy == 'true'
+      shell: bash
+      run: |
+        cd infra/terraform
+        
+        terraform destroy -auto-approve
 
   prd:
     needs: [dev]
