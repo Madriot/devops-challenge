@@ -15,7 +15,7 @@ private_dns_zone_name = "privatelink.westeurope.azmk8s.io"
 
 subnets = {
   "aks" = {
-        address_prefixes = ["10.10.11.0/26"]
+    address_prefixes = ["10.10.11.0/26"]
   }
 }
 
