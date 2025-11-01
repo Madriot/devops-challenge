@@ -31,14 +31,6 @@ jobs:
     steps:
     - uses: actions/checkout@v4
 
-    - uses: cschleiden/replace-tokens@v1
-      with:
-        tokenPrefix: '{'
-        tokenSuffix: '}'
-        files: '["**/*.tf"]'
-      env:
-        CDN: https://somecdn.com/...
-
     - name: Lint
       shell: bash
       run: |
