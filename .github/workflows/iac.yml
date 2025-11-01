@@ -53,11 +53,6 @@ jobs:
         SHARED_RG: ${{ secrets.SHARED_RG }}
         SHARED_STORAGE_ACCOUNT: ${{ secrets.SHARED_STORAGE_ACCOUNT }}
         TFSTATE_CONTAINER: ${{ secrets.TFSTATE_CONTAINER }}
-        ARM_TENANT_ID: ${{ secrets.ARM_TENANT_ID }}
-        ARM_CLIENT_SECRET: ${{ secrets.ARM_CLIENT_SECRET }}
-        ARM_CLIENT_ID: ${{ secrets.ARM_CLIENT_ID }}
-        ARM_SUBSCRIPTION_ID: ${{ secrets.ARM_SUBSCRIPTION_ID }}
-
 
     - name: Terraform Init
       shell: bash
@@ -65,6 +60,11 @@ jobs:
         cd infra/terraform
         
         terraform init
+      env:
+        ARM_TENANT_ID: ${{ secrets.ARM_TENANT_ID }}
+        ARM_CLIENT_SECRET: ${{ secrets.ARM_CLIENT_SECRET }}
+        ARM_CLIENT_ID: ${{ secrets.ARM_CLIENT_ID }}
+        ARM_SUBSCRIPTION_ID: ${{ secrets.ARM_SUBSCRIPTION_ID }}
 
     - name: Terraform Plan
       shell: bash
