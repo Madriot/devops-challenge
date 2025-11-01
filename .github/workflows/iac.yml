@@ -79,7 +79,7 @@ jobs:
         terraform plan -out plan
 
     - name: Terraform Apply
-      if: github.event.inputs.planOnly == false && github.event.inputs.destroy == false
+      if: github.event.inputs.planOnly == false && github.event.inputs.destroy == false && github.event_name == 'workflow_dispatch'
       shell: bash
       run: |
         cd infra/terraform
@@ -87,7 +87,7 @@ jobs:
         terraform plan -out plan.out
 
     - name: Terraform Destroy
-      if: github.event.inputs.planOnly == false && github.event.inputs.destroy == true
+      if: github.event.inputs.planOnly == false && github.event.inputs.destroy == true && github.event_name == 'workflow_dispatch'
       shell: bash
       run: |
         cd infra/terraform
