@@ -54,7 +54,7 @@ jobs:
 
   prd:
     needs: [dev]
-    if: github.event_name == 'workflow_dispatch'
+    if: github.event_name == 'workflow_dispatch' && github.ref_name == 'main'
     runs-on: self-hosted
 
     environment:
