@@ -7,12 +7,24 @@ on:
     branches: [ "main" ]
   workflow_dispatch:
 
+env:
+  REGISTRY: acr
+  IMAGE: demo/app
+  #  ${{ secrets.acr }}
+
 jobs:
   test:
     runs-on: self-hosted
 
     steps:
     - uses: actions/checkout@v4
+
+    - name: Unit tests
+      shell: bash
+      run: |
+        cd app/
+        yarn install
+        yarn test
   
   build:
     needs: [test]
@@ -20,6 +32,17 @@ jobs:
   
     steps:
     - uses: actions/checkout@v4
+
+    - name: Podman build and push
+      shell: bash
+      run: |
+        cd app/
+        podman build . --file Dockerfile --build-arg SYS_ENV=helloworld --tag $REGISTRY/$IMAGE:${GITHUB_SHA::7} --tag $REGISTRY/$IMAGE:latest
+
+        # echo "Push images"
+        # podman login to ACR
+        # podman push $REGISTRY/$IMAGE:latest
+        # podman push $REGISTRY/$IMAGE:${GITHUB_SHA::7}
 
   dev:
     needs: [build]
@@ -29,9 +52,9 @@ jobs:
     steps:
     - uses: actions/checkout@v4
 
-  prod:
+  prd:
     needs: [dev]
-    if: github.event_name == 'workflow_dispatch'
+    if: github.event_name == 'workflow_dispatch' && github.ref_name == 'main'
     runs-on: self-hosted
 
     environment:

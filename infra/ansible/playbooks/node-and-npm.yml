@@ -1,0 +1,81 @@
+---
+- name: Install NodeJS and NPM
+  hosts: all
+  become: yes
+  vars:
+    node_version: "v24.11.0"
+    node_bin_path: "/usr/local/bin/"
+    node_install_location: "/usr/share/node"
+    node_download_path: /tmp/node.tar.xz
+    node_unarchive_path: /tmp/
+  
+  tasks:
+  - name: Check current NodeJS version
+    command: node -v
+    register: node_version_output
+    failed_when: false
+    changed_when: false
+  
+  - name: Parse Node version
+    set_fact: 
+      installed_node_version: "{{ node_version_output.stdout }}"
+    when: node_version_output.stdout != ""
+  
+  - name: Determine if NodeJS needs installation
+    set_fact:
+      node_needs_install: "{{ installed_node_version is not defined or installed_node_version != node_version }}"
+
+  - name: Download NodeJS 
+    get_url:
+      url: https://nodejs.org/dist/{{ node_version }}/node-{{ node_version }}-linux-x64.tar.xz
+      dest: "{{ node_download_path }}"
+      mode: "0644"
+      force: yes
+    when: node_needs_install
+
+  - name: Unzip NodeJS
+    unarchive:
+      src: "{{ node_download_path }}"
+      dest: "{{ node_unarchive_path }}"
+      remote_src: yes
+      mode: "0755"
+      extra_opts: 
+      - "-o" # Overwrite
+    when: node_needs_install
+
+  - name: Copy NodeJS files
+    copy:
+      src: "{{ node_unarchive_path }}/node-{{ node_version }}-linux-x64"
+      dest: "{{ node_install_location }}"
+      remote_src: yes
+      mode: "0755"
+      force: yes
+    when: node_needs_install
+
+  - name: Create NodeJS symlink
+    file:
+      src: "{{ node_install_location }}/node-{{ node_version }}-linux-x64/bin/node"
+      dest: "{{ node_bin_path }}/node"
+      state: link
+      force: yes
+    when: node_needs_install
+
+  - name: Create Corepack symlink
+    file:
+      src: "{{ node_install_location }}/node-{{ node_version }}-linux-x64/bin/corepack"
+      dest: "{{ node_bin_path }}/corepack"
+      state: link
+      force: yes
+    when: node_needs_install
+  
+  - name: Create NPM symlink
+    file:
+      src: "{{ node_install_location }}/node-{{ node_version }}-linux-x64/bin/npm"
+      dest: "{{ node_bin_path }}/npm"
+      state: link
+      force: yes
+    when: node_needs_install
+
+  - name: Enable Corepack
+    command: corepack enable
+    when: node_needs_install
