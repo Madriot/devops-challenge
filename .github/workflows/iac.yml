@@ -77,7 +77,7 @@ jobs:
         terraform plan -out plan
 
     - name: Terraform Apply
-      if: github.event.inputs.planOnly != 'true' && github.event.inputs.destroy != 'true'
+      if: github.event.inputs.planOnly == 'false' && github.event.inputs.destroy == 'false'
       shell: bash
       run: |
         cd infra/terraform
