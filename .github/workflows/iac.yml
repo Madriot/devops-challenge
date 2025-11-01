@@ -31,11 +31,19 @@ jobs:
     steps:
     - uses: actions/checkout@v4
 
+    - uses: cschleiden/replace-tokens@v1
+      with:
+        tokenPrefix: '{'
+        tokenSuffix: '}'
+        files: '["**/*.tf"]'
+      env:
+        CDN: https://somecdn.com/...
+
     - name: Lint
       shell: bash
       run: |
         cd infra/terraform
-        FMT=$(terraform fmt -recursive -check)
+        FMT=$(terraform fmt -recursive -check || true)
         
         if [ -n "$FMT" ]; then
           echo "Error: Please reformat Terraform files before pushing your changes!"
