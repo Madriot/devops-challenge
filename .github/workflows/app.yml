@@ -2,7 +2,8 @@ name: Deploy App
 
 on:
   push:
-    branches: [ "main" ]
+    # branches: [ "main" ]
+    branches: [ "dev" ]
   pull_request:
     branches: [ "main" ]
   workflow_dispatch:
@@ -13,6 +14,13 @@ jobs:
 
     steps:
     - uses: actions/checkout@v4
+
+    - name: Unit tests
+      shell: bash
+      run: |
+        cd app/
+        yarn install
+        yarn test
   
   build:
     needs: [test]

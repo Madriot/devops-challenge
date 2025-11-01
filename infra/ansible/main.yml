@@ -6,3 +6,4 @@
 - import_playbook: playbooks/terraform.yml
 - import_playbook: playbooks/az-cli.yml
 - import_playbook: playbooks/actions-runner.yml
+- import_playbook: playbooks/node-and-npm.yml

@@ -1,0 +1,24 @@
+---
+- name: Install Node and NPM
+  hosts: all
+  become: yes
+  
+  tasks:
+    - name: Ensure system packages are updated
+      apt:
+        update_cache: yes
+        cache_valid_time: 3600
+      when: ansible_os_family == "Debian"
+    
+    - name: Install Node and NPM
+      apt:
+        name: 
+        - nodejs
+        - npm
+        state: present
+      when: ansible_os_family == "Debian"
+
+    - name: Install and enable Corepack
+      command: |
+        npm install -g corepack 
+        corepack enable
