@@ -17,3 +17,5 @@
         state: present
       when: ansible_os_family == "Debian"
     
+    - name: Allow podman user to run services without being logged in
+      command: loginctl enable-linger 1000
